@@ -1,70 +1,66 @@
-var operants=[];//array that stores operants
-var operators=[];//array that stores operators
-var expression=[];//array that stores operators and operant
-//function to handle button click
-$(".b,.orange,.light,.green").click(function(){
-    var buttonText=$(this).text();
+var currentInput='';
+//function to append symbol on screen
+function appendNumber(value){
+    currentInput +=value;
+    updateScreen();
+}
+
+//append symbol to screen
+function appendSymbol(value){
+    if(value ==="%"){
+        currentInput+='*0.01';//convert percentage to decimal form for evaluation
+    }else{
+    currentInput +=value;
+    }
+    updateScreen();
+}
+
+//function to clear the screen
+function clearScreen(){
+    currentInput='';
+    updateScreen();
+}
+
+//function to delete from screen
+function deleteLast(){
+    currentInput=currentInput.slice(0,-1);
+    updateScreen();
+}
+
+//function to calculate the result
+function calculateResult(){
+    try{
+        const result=eval(currentInput);
+        currentInput=result.toString();
+        updateScreen();
+    }catch(error){
+        //error to be returned 
+        currentInput='error';
+        updateScreen();
+    }
+}
+//update screen values
+function updateScreen(){
+    $('#main').text(currentInput);
+}
+//function to handle button clicked
+$(".b,.light,.orange,.green").click(function(){
+    const buttonText=$(this).text();
     if($(this).hasClass('b')){
-        //clicked button is an operant,
-        operants.push(buttonText);
-        expression.push(buttonText);
+        appendNumber(buttonText);
     }
     if($(this).hasClass('orange')){
-        //clicked button is an operator
-        operators.push(buttonText);
-        expression.push(buttonText);
+        appendSymbol(buttonText);
     }
     if($(this).hasClass('light')){
-        var txt=$(this).text();
-        if(txt==='C'){
-            expression.splice(0,expression.length);
+        if($(this).text()=='C'){
+            clearScreen();
         }
-        if(txt==='DEL'){
-            expression.pop();
+        if($(this).text()=='DEL'){
+            deleteLast();
         }
     }
     if($(this).hasClass('green')){
-        try{
-            calculateResult(operators,operants);
-        }
-        catch(error){
-            var err=error.message;
-            expression.push(err);
-        }
+        calculateResult();
     }
-    $("h1").html(expression.join(''));
-    
 })
-//function to calculator result from operator and operantsl
-function calculateResult(operators,operants){
-    // handles the case where number of operators is not lessthan 1 the number of operands
-    if(operators.length !== operants.length - 1){
-        throw new Error("Maths Error");
-    }
-    //innitialize the result with the first operand
-    var result=parseFloat(operants[0]);
-    //iterate through the arrays
-    for(var i=0;i<operators.length;i++){
-        var operand=parseFloat(operants[i+1]);
-        var operator=operators[i];
-        //perform the calculation based on the operator
-        switch(operator){
-            case '+':
-                result +=operand;
-                 break;
-            case '/':
-                result /=operand;
-                break;
-            case '*':
-                result *=operand;
-                break;
-            case '-':
-                result -=operand;
-                break;
-            default:
-                $("h1").html("invalid operator");
-        }
-    }
-    expression=[];
-    expression.push(result);
-}
